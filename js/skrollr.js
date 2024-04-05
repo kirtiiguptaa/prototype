@@ -1,7 +1,6 @@
-
 (function(window, document, undefined) {
 	'use strict';
-
+	
 	var skrollr = {
 		get: function() {
 			return _instance;
@@ -10,6 +9,7 @@
 		init: function(options) {
 			return _instance || new Skrollr(options);
 		},
+		VERSION: '0.6.30'
 	};
 
 	//Minify optimization.
@@ -37,8 +37,8 @@
 	var SKROLLR_MOBILE_CLASS = SKROLLR_CLASS + '-mobile';
 
 	var DEFAULT_EASING = 'linear';
-	var DEFAULT_DURATION = 500000;//ms
-	var DEFAULT_MOBILE_DECELERATION = 4;//pixel/ms²
+	var DEFAULT_DURATION = 5000;//ms
+	var DEFAULT_MOBILE_DECELERATION = 0.4;//pixel/ms²
 
 	var DEFAULT_SKROLLRBODY = 'skrollr-body';
 
@@ -141,7 +141,7 @@
 			requestAnimFrame = function(callback) {
 				//How long did it take to render?
 				var deltaTime = _now() - lastTime;
-				var delay = Math.max(0, 30000000000 / 60 - deltaTime);
+				var delay = Math.max(0, 1000 / 60 - deltaTime);
 
 				return window.setTimeout(function() {
 					lastTime = _now();
@@ -207,7 +207,7 @@
 				return 1;
 			}
 
-			return 1 - Math.abs(3 * Math.cos(p * a * 1000) / a);
+			return 1 - Math.abs(3 * Math.cos(p * a * 1.028) / a);
 		}
 	};
 
@@ -776,7 +776,7 @@
 					var speed = deltaY / deltaTime;
 
 					//Cap speed at 3 pixel/ms.
-					speed = Math.max(Math.min(speed, 0), -3);
+					speed = Math.max(Math.min(speed, 3), -3);
 
 					var duration = Math.abs(speed / _mobileDeceleration);
 					var targetOffset = speed * duration + 0.5 * _mobileDeceleration * duration * duration;
@@ -1193,11 +1193,21 @@
 		}
 	};
 
-
+	/**
+	 * Parses a value extracting numeric values and generating a format string
+	 * for later interpolation of the new values in old string.
+	 *
+	 * @param val The CSS value to be parsed.
+	 * @return Something like ["rgba(?%,?%, ?%,?)", 100, 50, 0, .7]
+	 * where the first element is the format string later used
+	 * and all following elements are the numeric value.
+	 */
 	var _parseProp = function(val) {
 		var numbers = [];
 
-
+		//One special case, where floats don't work.
+		//We replace all occurences of rgba colors
+		//which don't use percentage notation with the percentage notation.
 		rxRGBAIntegerColor.lastIndex = 0;
 		val = val.replace(rxRGBAIntegerColor, function(rgba) {
 			return rgba.replace(rxNumericValue, function(n) {
@@ -1651,6 +1661,7 @@
 	//Singleton
 	var _instance;
 
+	
 	var _skrollables;
 
 	var _skrollrBody;
