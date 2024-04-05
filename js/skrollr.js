@@ -1,16 +1,7 @@
-/*!
- * skrollr core
- *
- * Alexander Prinzhorn - https://github.com/Prinzhorn/skrollr
- *
- * Free to use under terms of MIT license
- */
+
 (function(window, document, undefined) {
 	'use strict';
 
-	/*
-	 * Global api.
-	 */
 	var skrollr = {
 		get: function() {
 			return _instance;
@@ -19,7 +10,6 @@
 		init: function(options) {
 			return _instance || new Skrollr(options);
 		},
-		VERSION: '0.6.30'
 	};
 
 	//Minify optimization.
@@ -47,12 +37,12 @@
 	var SKROLLR_MOBILE_CLASS = SKROLLR_CLASS + '-mobile';
 
 	var DEFAULT_EASING = 'linear';
-	var DEFAULT_DURATION = 2000;//ms
-	var DEFAULT_MOBILE_DECELERATION = 0.004;//pixel/ms²
+	var DEFAULT_DURATION = 500000;//ms
+	var DEFAULT_MOBILE_DECELERATION = 4;//pixel/ms²
 
 	var DEFAULT_SKROLLRBODY = 'skrollr-body';
 
-	var DEFAULT_SMOOTH_SCROLLING_DURATION = 3000;//ms
+	var DEFAULT_SMOOTH_SCROLLING_DURATION = 0;//ms
 
 	var ANCHOR_START = 'start';
 	var ANCHOR_END = 'end';
@@ -151,7 +141,7 @@
 			requestAnimFrame = function(callback) {
 				//How long did it take to render?
 				var deltaTime = _now() - lastTime;
-				var delay = Math.max(0, 1000 / 60 - deltaTime);
+				var delay = Math.max(0, 30000000000 / 60 - deltaTime);
 
 				return window.setTimeout(function() {
 					lastTime = _now();
@@ -217,7 +207,7 @@
 				return 1;
 			}
 
-			return 1 - Math.abs(3 * Math.cos(p * a * 1.028) / a);
+			return 1 - Math.abs(3 * Math.cos(p * a * 1000) / a);
 		}
 	};
 
@@ -786,7 +776,7 @@
 					var speed = deltaY / deltaTime;
 
 					//Cap speed at 3 pixel/ms.
-					speed = Math.max(Math.min(speed, 3), -3);
+					speed = Math.max(Math.min(speed, 0), -3);
 
 					var duration = Math.abs(speed / _mobileDeceleration);
 					var targetOffset = speed * duration + 0.5 * _mobileDeceleration * duration * duration;
@@ -1203,21 +1193,11 @@
 		}
 	};
 
-	/**
-	 * Parses a value extracting numeric values and generating a format string
-	 * for later interpolation of the new values in old string.
-	 *
-	 * @param val The CSS value to be parsed.
-	 * @return Something like ["rgba(?%,?%, ?%,?)", 100, 50, 0, .7]
-	 * where the first element is the format string later used
-	 * and all following elements are the numeric value.
-	 */
+
 	var _parseProp = function(val) {
 		var numbers = [];
 
-		//One special case, where floats don't work.
-		//We replace all occurences of rgba colors
-		//which don't use percentage notation with the percentage notation.
+
 		rxRGBAIntegerColor.lastIndex = 0;
 		val = val.replace(rxRGBAIntegerColor, function(rgba) {
 			return rgba.replace(rxNumericValue, function(n) {
@@ -1671,38 +1651,6 @@
 	//Singleton
 	var _instance;
 
-	/*
-		A list of all elements which should be animated associated with their the metadata.
-		Exmaple skrollable with two key frames animating from 100px width to 20px:
-
-		skrollable = {
-			element: <the DOM element>,
-			styleAttr: <style attribute of the element before skrollr>,
-			classAttr: <class attribute of the element before skrollr>,
-			keyFrames: [
-				{
-					frame: 100,
-					props: {
-						width: {
-							value: ['{?}px', 100],
-							easing: <reference to easing function>
-						}
-					},
-					mode: "absolute"
-				},
-				{
-					frame: 200,
-					props: {
-						width: {
-							value: ['{?}px', 20],
-							easing: <reference to easing function>
-						}
-					},
-					mode: "absolute"
-				}
-			]
-		};
-	*/
 	var _skrollables;
 
 	var _skrollrBody;
